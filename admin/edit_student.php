@@ -3,6 +3,7 @@ $baseDepth = "../";
 require_once '../includes/db.php';
 require_once '../includes/admin_check.php';
 require_once '../includes/helpers.php';
+require_once '../includes/mailer.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $stmt = $conn->prepare("SELECT * FROM students WHERE id=?");
@@ -14,6 +15,8 @@ $stmt->close();
 if (!$student) { $_SESSION['flash']="Student not found."; header("Location: students.php"); exit; }
 
 $errors = [];
+$password_changed = false;
+$plain_new_password = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name  = trim($_POST['full_name'] ?? '');
@@ -74,6 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "UPDATE students SET full_name=?,email=?,password=?,phone=?,gender=?,course=?,dob=?,profile_image=?,address=?,status=?,password_changed_by_admin=1,temp_password=? WHERE id=?"
                 );
                 $stmt->bind_param("sssssssssssi", $full_name,$email,$hashed,$phone,$gender,$course,$dob,$profile_image,$address,$status,$password,$id);
+                $password_changed = true;
+                $plain_new_password = $password;
             }
         } else {
             $stmt = $conn->prepare(
@@ -84,6 +89,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($errors)) {
             if ($stmt->execute()) {
                 $_SESSION['flash'] = "Student updated successfully.";
+
+                if ($password_changed) {
+                    $subject = 'Your Student Portal password has been changed';
+                    $body = "Hi " . $full_name . ",\n\nYour account password has been changed by the administrator.\n\nYour new password is:\n\n    " . $plain_new_password . "\n\nIf you did not request this change, please contact the administration immediately.\n\nRegards,\nStudent Portal Team";
+                    $sent = smtp_send_mail($email, $subject, $body, [
+                        'Reply-To' => MAIL_FROM,
+                        'X-Mailer' => 'PHP/' . phpversion(),
+                    ]);
+                    if (!$sent) {
+                        $_SESSION['flash'] .= " However, the notification email could not be sent.";
+                    }
+                }
+
                 header("Location: students.php"); exit;
             } else { $errors[] = "Failed to update student."; }
             $stmt->close();

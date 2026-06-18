@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            $stmt = $conn->prepare("SELECT id, full_name, email, password, status FROM students WHERE email = ?");
+            $stmt = $conn->prepare("SELECT id, full_name, email, password, status, password_changed_by_admin FROM students WHERE email = ?");
             $stmt->bind_param("s", $identifier);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -45,6 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $_SESSION['student_id'] = $row['id'];
                         $_SESSION['student_name'] = $row['full_name'];
+
+                        // If admin had changed the password, clear the notification flag and temp password now that student logged in
+                        if (!empty($row['password_changed_by_admin'])) {
+                            $upd = $conn->prepare("UPDATE students SET password_changed_by_admin = 0, temp_password = NULL WHERE id = ?");
+                            $upd->bind_param("i", $row['id']);
+                            $upd->execute();
+                            $upd->close();
+                        }
 
                         header("Location: student/dashboard.php");
                         exit;
