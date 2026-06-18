@@ -1,0 +1,92 @@
+/* General */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    font-weight: 500;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.sidebar .nav-link i {
+    margin-right: 8px;
+}
+
+/* Content area */
+.content-area {
+    min-height: calc(100vh - 56px);
+}
+
+/* Cards */
+.card {
+    border-radius: 10px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+}
+
+.table img {
+    object-fit: cover;
+}
+
+/* Login tabs */
+#loginTabs .nav-link {
+    cursor: pointer;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Responsive sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+    .d-flex {
+        flex-direction: column;
+    }
+}
+
+/* Badges */
+.badge {
+    font-size: 0.85em;
+}
+
+/* Pagination */
+.pagination {
+    margin-top: 1rem;
+}
+
+/* Profile image preview */
+#profilePreview {
+    object-fit: cover;
+}
